@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: aggregator
+
+aggregation:
+  tools:
+    java:
+      pmd: ${PMD_URL:http://localhost:8090}
+      checkstyle: ${CHECKSTYLE_URL:http://localhost:8092}
+    javascript:
+      eslint: ${ESLINT_URL:http://localhost:8091}
+  exchange:
+    maximum-timeout: 10
