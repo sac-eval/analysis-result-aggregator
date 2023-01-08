@@ -1,11 +1,10 @@
 package masters.staticanalysistools.aggregator.service;
 
 import masters.staticanalysistools.aggregator.schema.Sarif;
-
-import java.util.List;
+import masters.staticanalysistools.aggregator.service.command.AggregationCommand;
 
 public interface AggregationService {
 
-    Sarif aggregate(List<Sarif> sarifList);
+    Sarif aggregate(AggregationCommand aggregationCommand);
 
 }

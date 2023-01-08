@@ -23,7 +23,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final RestTemplate restTemplate;
 
     @Override
-    public <T, U> List<T> requestMultipleSarifAnalysisInParallel(ParallelExchangeCommand<U> parallelExchangeCommand,
+    public <T, U> List<T> requestMultipleInParallel(ParallelExchangeCommand<U> parallelExchangeCommand,
         ParameterizedTypeReference<T> parameterizedTypeReference) {
         final List<CompletableFuture<T>> completableFutureList = parallelExchangeCommand.getUrls().stream()
             .map(uri -> postRequestAsync(uri, parallelExchangeCommand.getBody(), parameterizedTypeReference)).toList();

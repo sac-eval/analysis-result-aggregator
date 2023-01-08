@@ -16,4 +16,7 @@ public class AnalysisCommand {
     @NotBlank
     private String language;
 
+    @NotNull
+    private Boolean flattenViolations;
+
 }

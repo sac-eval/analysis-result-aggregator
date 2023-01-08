@@ -3,4 +3,5 @@ version: "3"
 services:
   aggregator:
     image: aggregator
-    network_mode: host
+    ports:
+      - "8080:8080"

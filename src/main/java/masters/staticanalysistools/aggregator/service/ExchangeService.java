@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ExchangeService {
 
-    <T, U> List<T> requestMultipleSarifAnalysisInParallel(ParallelExchangeCommand<U> parallelExchangeCommand,
+    <T, U> List<T> requestMultipleInParallel(ParallelExchangeCommand<U> parallelExchangeCommand,
         ParameterizedTypeReference<T> parameterizedTypeReference);
 
 }

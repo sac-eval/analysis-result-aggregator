@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: aggregator
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
 
 aggregation:
   tools:
@@ -11,6 +16,7 @@ aggregation:
       pmd: ${PMD_URL:http://localhost:8090}
       checkstyle: ${CHECKSTYLE_URL:http://localhost:8092}
     javascript:
+      pmd: ${PMD_URL:http://localhost:8090}
       eslint: ${ESLINT_URL:http://localhost:8091}
   exchange:
     maximum-timeout: 10
