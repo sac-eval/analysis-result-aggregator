@@ -15,8 +15,12 @@ aggregation:
     java:
       pmd: ${PMD_URL:http://localhost:8090}
       checkstyle: ${CHECKSTYLE_URL:http://localhost:8092}
+      infer: ${INFER_URL:http://localhost:8093}
     javascript:
       pmd: ${PMD_URL:http://localhost:8090}
       eslint: ${ESLINT_URL:http://localhost:8091}
+    c:
+      infer: ${INFER_URL:http://localhost:8093}
+      cppcheck: ${CPPCHECK_URL:http://localhost:8094}
   exchange:
     maximum-timeout: 10
