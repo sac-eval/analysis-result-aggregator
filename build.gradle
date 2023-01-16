@@ -56,6 +56,6 @@ jib {
     image = 'azul/zulu-openjdk:17-jre'
   }
   to {
-    image = 'aggregator'
+    image = 'sarif-aggregator'
   }
 }

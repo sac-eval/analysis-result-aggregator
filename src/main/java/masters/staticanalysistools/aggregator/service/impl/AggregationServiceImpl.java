@@ -3,6 +3,7 @@ package masters.staticanalysistools.aggregator.service.impl;
 import lombok.RequiredArgsConstructor;
 import masters.staticanalysistools.aggregator.entity.RuleViolation;
 import masters.staticanalysistools.aggregator.schema.ExternalProperties;
+import masters.staticanalysistools.aggregator.schema.ReportingDescriptor;
 import masters.staticanalysistools.aggregator.schema.Result;
 import masters.staticanalysistools.aggregator.schema.Run;
 import masters.staticanalysistools.aggregator.schema.Sarif;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,9 @@ public class AggregationServiceImpl implements AggregationService {
                 .flatMap(intermediate -> intermediate.getRuns().stream())
                 .toList();
         final List<Run> finalizedRuns =
-            aggregationCommand.getFlattenViolations() ? flattenSynonymViolations(aggregatedRuns) : aggregatedRuns;
+            Boolean.TRUE.equals(aggregationCommand.getFlattenViolations()) ?
+                flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools()) :
+                aggregatedRuns;
         sarif.setRuns(finalizedRuns);
 
         final Set<ExternalProperties> aggregatedInlineExternalProperties =
@@ -54,35 +58,33 @@ public class AggregationServiceImpl implements AggregationService {
         return sarif;
     }
 
-    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns) {
+    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools) {
         final Map<String, Set<String>> inclusionSetMap = new HashMap<>();
-
-        // create a map of included result ids
-        for (Run run : aggregatedRuns) {
-            final String toolName = run.getTool().getDriver().getName();
-
-            run.getResults().forEach(result -> {
-                final Set<String> ruleIdSet = inclusionSetMap.getOrDefault(toolName, new HashSet<>());
-
-                ruleIdSet.add(result.getRuleId());
-
-                inclusionSetMap.put(toolName, ruleIdSet);
-            });
-        }
 
         // for each run and each result see if already included violations are synonyms, if they are remove them
         for (Run run : aggregatedRuns) {
             final String toolName = run.getTool().getDriver().getName();
 
             run.getResults().forEach(result -> {
-                final RuleViolation ruleViolation =
-                    ruleViolationQueryService.findRuleViolationByRuleIdAndTool(toolName, result.getRuleId());
+                final Set<RuleViolation> synonyms =
+                    ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName);
 
-                ruleViolation.getSynonyms()
-                    .stream()
+                final List<RuleViolation> currentSynonyms = synonyms.stream()
                     .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool(), Collections.emptySet())
                         .contains(synonym.getRuleId()))
-                    .forEach(synonym -> inclusionSetMap.get(synonym.getTool()).remove(synonym.getRuleId()));
+                    .toList();
+
+                if (currentSynonyms.isEmpty() || preferredTools.contains(toolName)) {
+                    currentSynonyms.forEach(
+                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool(), new HashSet<>())
+                            .remove(ruleViolation.getRuleId()));
+
+                    final Set<String> ruleIdSet = inclusionSetMap.getOrDefault(toolName, new HashSet<>());
+
+                    ruleIdSet.add(result.getRuleId());
+
+                    inclusionSetMap.put(toolName, ruleIdSet);
+                }
             });
         }
 
@@ -90,8 +92,19 @@ public class AggregationServiceImpl implements AggregationService {
         for (Run run : aggregatedRuns) {
             final String toolName = run.getTool().getDriver().getName();
 
+            final Set<ReportingDescriptor> rules = run.getTool().getDriver().getRules();
+            if (Objects.nonNull(rules)) {
+                final Set<ReportingDescriptor> includedRules = rules.stream()
+                    .filter(rule -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
+                        .contains(rule.getName()))
+                    .collect(Collectors.toSet());
+
+                run.getTool().getDriver().setRules(includedRules);
+            }
+
             final List<Result> includedResults = run.getResults().stream()
-                .filter(result -> inclusionSetMap.get(toolName).contains(result.getRuleId()))
+                .filter(result -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
+                    .contains(result.getRuleId()))
                 .toList();
 
             run.setResults(includedResults);

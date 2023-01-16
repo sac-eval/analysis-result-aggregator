@@ -2,8 +2,10 @@ package masters.staticanalysistools.aggregator.service;
 
 import masters.staticanalysistools.aggregator.entity.RuleViolation;
 
+import java.util.Set;
+
 public interface RuleViolationQueryService {
 
-    RuleViolation findRuleViolationByRuleIdAndTool(String ruleId, String tool);
+    Set<RuleViolation> findSynonyms(String ruleId, String tool);
 
 }

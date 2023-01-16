@@ -14,7 +14,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
             AggregationCommand.builder()
                 .sarifs(sarifList)
                 .flattenViolations(analysisCommand.getFlattenViolations())
-                .preferedTools(Collections.emptySet())
+                .preferedTools(analysisCommand.getPreferedTools())
                 .build();
 
         return aggregationService.aggregate(aggregationCommand);

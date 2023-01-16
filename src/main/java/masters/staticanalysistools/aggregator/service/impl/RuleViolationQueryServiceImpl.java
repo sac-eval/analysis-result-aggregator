@@ -6,7 +6,7 @@ import masters.staticanalysistools.aggregator.repository.RuleViolationRepository
 import masters.staticanalysistools.aggregator.service.RuleViolationQueryService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -15,14 +15,8 @@ public class RuleViolationQueryServiceImpl implements RuleViolationQueryService 
     private final RuleViolationRepository ruleViolationRepository;
 
     @Override
-    public RuleViolation findRuleViolationByRuleIdAndTool(String ruleId, String tool) {
-        final RuleViolation defaultRuleViolation = new RuleViolation();
-        defaultRuleViolation.setRuleId(ruleId);
-        defaultRuleViolation.setTool(tool);
-        defaultRuleViolation.setSynonyms(Collections.emptySet());
-
-        return ruleViolationRepository
-            .findRuleViolationByRuleIdAndTool(ruleId, tool).orElse(defaultRuleViolation);
+    public Set<RuleViolation> findSynonyms(String ruleId, String tool) {
+        return ruleViolationRepository.findAllSynonyms(ruleId, tool);
     }
 
 }

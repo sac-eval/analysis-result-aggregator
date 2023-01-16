@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 public class AnalysisCommand {
 
@@ -18,5 +21,7 @@ public class AnalysisCommand {
 
     @NotNull
     private Boolean flattenViolations;
+
+    private Set<String> preferedTools = new HashSet<>();
 
 }

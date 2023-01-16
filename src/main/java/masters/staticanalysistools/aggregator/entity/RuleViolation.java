@@ -25,8 +25,7 @@ public class RuleViolation {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -38,7 +37,7 @@ public class RuleViolation {
     @ManyToMany
     @JoinTable(name = "synonyms",
         joinColumns = @JoinColumn(name = "id"),
-        inverseJoinColumns = @JoinColumn(name = "synonyms_id"))
+        inverseJoinColumns = @JoinColumn(name = "synonym_id"))
     private Set<RuleViolation> synonyms;
 
 }

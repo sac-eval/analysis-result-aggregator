@@ -4,3 +4,4 @@ spring:
       enabled: true
   jpa:
     show-sql: true
+    defer-datasource-initialization: true
