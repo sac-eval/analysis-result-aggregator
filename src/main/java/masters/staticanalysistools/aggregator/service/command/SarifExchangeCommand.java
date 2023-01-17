@@ -8,10 +8,10 @@ import java.util.Collection;
 
 @Data
 @Builder
-public class ParallelExchangeCommand<T> {
+public class SarifExchangeCommand {
 
     private Collection<URI> urls;
 
-    private T body;
+    private AnalysisCommand analysisCommand;
 
 }

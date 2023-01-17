@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import masters.staticanalysistools.aggregator.schema.Sarif;
 import masters.staticanalysistools.aggregator.service.AggregationService;
 import masters.staticanalysistools.aggregator.service.AnalysisSagaService;
-import masters.staticanalysistools.aggregator.service.ExchangeService;
+import masters.staticanalysistools.aggregator.service.SarifExchangeService;
 import masters.staticanalysistools.aggregator.service.ToolService;
 import masters.staticanalysistools.aggregator.service.command.AggregationCommand;
 import masters.staticanalysistools.aggregator.service.command.AnalysisCommand;
-import masters.staticanalysistools.aggregator.service.command.ParallelExchangeCommand;
-import masters.staticanalysistools.aggregator.service.dto.ExchangeServiceResponse;
-import org.springframework.core.ParameterizedTypeReference;
+import masters.staticanalysistools.aggregator.service.command.SarifExchangeCommand;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -23,7 +21,7 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
 
     private final AggregationService aggregationService;
 
-    private final ExchangeService exchangeService;
+    private final SarifExchangeService sarifExchangeService;
 
     private final ToolService toolService;
 
@@ -31,15 +29,9 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
     public Sarif analyse(AnalysisCommand analysisCommand) {
         final Map<String, URI> tools = toolService.getToolsForLanguage(analysisCommand.getLanguage());
 
-        final ParallelExchangeCommand<AnalysisCommand> parallelExchangeCommand =
-            ParallelExchangeCommand.<AnalysisCommand>builder().urls(tools.values()).body(analysisCommand).build();
-        final List<ExchangeServiceResponse<Sarif>> exchangeServiceResponses =
-            exchangeService.requestMultipleInParallel(parallelExchangeCommand,
-                new ParameterizedTypeReference<>() {
-                });
-
-        final List<Sarif> sarifList =
-            exchangeServiceResponses.stream().map(ExchangeServiceResponse::getResult).toList();
+        final SarifExchangeCommand sarifExchangeCommand =
+            SarifExchangeCommand.builder().urls(tools.values()).analysisCommand(analysisCommand).build();
+        final List<Sarif> sarifList = sarifExchangeService.exchangeSarifList(sarifExchangeCommand);
 
         final AggregationCommand aggregationCommand =
             AggregationCommand.builder()

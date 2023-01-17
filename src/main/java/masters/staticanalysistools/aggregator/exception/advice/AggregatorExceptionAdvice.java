@@ -34,7 +34,6 @@ public class AggregatorExceptionAdvice {
     @ExceptionHandler(ParallelRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleMethodArgumentNotValidException(ParallelRequestException exception) {
-
         return getGenericError(exception);
     }
 

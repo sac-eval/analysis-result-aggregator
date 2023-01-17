@@ -1,9 +1,9 @@
 package masters.staticanalysistools.aggregator.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import masters.staticanalysistools.aggregator.exception.ParallelRequestException;
-import masters.staticanalysistools.aggregator.service.ExchangeService;
-import masters.staticanalysistools.aggregator.service.command.ParallelExchangeCommand;
+import masters.staticanalysistools.aggregator.service.ParallelExchangeService;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -13,33 +13,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Log
 @Service
 @RequiredArgsConstructor
-public class ExchangeServiceImpl implements ExchangeService {
+public class ParallelExchangeServiceImpl implements ParallelExchangeService {
 
     private final RestTemplate restTemplate;
 
     @Override
-    public <T, U> List<T> requestMultipleInParallel(ParallelExchangeCommand<U> parallelExchangeCommand,
-        ParameterizedTypeReference<T> parameterizedTypeReference) {
-        final List<CompletableFuture<T>> completableFutureList = parallelExchangeCommand.getUrls().stream()
-            .map(uri -> postRequestAsync(uri, parallelExchangeCommand.getBody(), parameterizedTypeReference)).toList();
-
-        CompletableFuture.allOf(completableFutureList.toArray(new CompletableFuture[0]));
-
-        return completableFutureList.stream().map(CompletableFuture::join).toList();
-    }
-
     @Async
-    public <T, U> CompletableFuture<T> postRequestAsync(URI uri, U body,
-        ParameterizedTypeReference<T> parameterizedTypeReference) {
+    public <T, U> CompletableFuture<T> postRequestAsync(URI uri, U body, ParameterizedTypeReference<T> parameterizedTypeReference) {
         try {
+            long startTime = System.nanoTime();
             final HttpEntity<U> httpEntity = new HttpEntity<>(body);
             final ResponseEntity<T> result =
                 restTemplate.exchange(uri, HttpMethod.POST, httpEntity, parameterizedTypeReference);
+            long endTime = System.nanoTime();
+
+            log.info(String.format("Execution time for %s took %d", uri, (endTime - startTime) / 1000000));
 
             return CompletableFuture.completedFuture(result.getBody());
         } catch (Exception exception) {
