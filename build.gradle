@@ -1,54 +1,59 @@
 plugins {
   id 'java'
   id 'groovy'
-  id 'org.springframework.boot' version '3.0.0'
+  id 'org.springframework.boot' version '3.0.4'
   id 'io.spring.dependency-management' version '1.1.0'
   id "io.freefair.lombok" version "6.6.1"
   id "org.jsonschema2dataclass" version "3.2.1"
-  id "com.google.cloud.tools.jib" version "3.1.4"
+  id "com.google.cloud.tools.jib" version "3.3.1"
 }
 
-group = 'masters.staticanalysistools'
+group = 'masters.aggregator-service'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-  annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-  implementation 'org.springframework.boot:spring-boot-starter-web'
-  implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.0'
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-  testImplementation('org.spockframework:spock-core:2.1-groovy-3.0')
-  testImplementation('org.spockframework:spock-spring:2.1-groovy-3.0')
-  testImplementation('org.springframework.boot:spring-boot-starter-test') {
-    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-  }
+    testImplementation('org.spockframework:spock-core:2.1-groovy-3.0')
+    testImplementation('org.spockframework:spock-spring:2.1-groovy-3.0')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 
-  runtimeOnly 'com.h2database:h2'
-  runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {
-  useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+tasks.named("bootBuildImage") {
+    imageName = "${project.name}"
+    publish = false
 }
 
 jsonSchema2Pojo {
-	targetPackage = 'masters.staticanalysistools.aggregator.schema'
-	source.setFrom files("${project.rootDir}/src/main/resources/schema")
-  includeDynamicSetters
+    targetPackage = 'masters.aggregatorservice.schema'
+    source.setFrom files("${project.rootDir}/src/main/resources/schema")
+    includeDynamicSetters
 }
 
 sourceSets {
-  main {
-    java {
-      srcDirs += ["${project.rootDir}/build/generated/sources/js2d"]
+    main {
+        java {
+            srcDirs += ["${project.rootDir}/build/generated/sources/js2d"]
+        }
     }
-  }
 }
 
 jib {
@@ -56,6 +61,6 @@ jib {
     image = 'azul/zulu-openjdk:17-jre'
   }
   to {
-    image = 'sarif-aggregator'
+    image = 'aggregator-service'
   }
 }
