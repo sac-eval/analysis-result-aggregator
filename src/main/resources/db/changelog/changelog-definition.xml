@@ -1,0 +1,110 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet id="20230316-01" author="Nikola Kešćec">
+        <comment>This changeset prepares tables for language, tools, possible tenants, rule violations.</comment>
+
+        <createTable tableName="language">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="language_id_pk"/>
+            </column>
+            <column name="name" type="varchar(250)">
+                <constraints unique="true" uniqueConstraintName="language_name_unique"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="tool">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="tool_id_pk"/>
+            </column>
+            <column name="name" type="varchar(300)">
+                <constraints unique="true" uniqueConstraintName="tool_name_unique"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="tenant">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>
+            </column>
+            <column name="name" type="varchar(300)">
+                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="rule_violation">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="rule_violation_id_pk"/>
+            </column>
+            <column name="rule_sarif_id" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tool_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="rule_violation" columnNames="rule_sarif_id, language_id, tool_id"
+                             constraintName="rule_violation_unique"/>
+        <addForeignKeyConstraint baseTableName="rule_violation" baseColumnNames="language_id"
+                                 constraintName="rule_violation_language_foreign_key"
+                                 referencedTableName="language"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="rule_violation" baseColumnNames="tool_id"
+                                 constraintName="rule_violation_tool_foreign_key"
+                                 referencedTableName="tool"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="synonyms">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="synonym_id_pk"/>
+            </column>
+            <column name="base_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="synonym_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="synonyms" baseColumnNames="base_id"
+                                 constraintName="base_id_rule_violation_foreign_key"
+                                 referencedTableName="rule_violation"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="synonyms" baseColumnNames="synonym_id"
+                                 constraintName="synonym_id_rule_violation_foreign_key"
+                                 referencedTableName="rule_violation"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="statistic">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="statistic_id_pk"/>
+            </column>
+            <column name="rule_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="occurrence" type="bigint" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="rule_id"
+                                 constraintName="statistic_rule_violation_foreign_key"
+                                 referencedTableName="rule_violation"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"
+                                 constraintName="statistic_tenant_foreign_key"
+                                 referencedTableName="tenant"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

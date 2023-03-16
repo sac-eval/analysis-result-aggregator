@@ -12,6 +12,10 @@ spring:
   jackson:
     serialization:
       write-empty-json-arrays: false
+  jpa:
+    show-sql: true # //TODO: NOT GOOD
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
 
 aggregation:
   tools:
@@ -27,3 +31,4 @@ aggregation:
       cppcheck: ${CPPCHECK_URL:http://localhost:8094}
   exchange:
     maximum-timeout: 10
+
