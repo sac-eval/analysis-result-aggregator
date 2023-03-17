@@ -1,11 +1,11 @@
 plugins {
-    id 'java'
-    id 'groovy'
-    id 'org.springframework.boot' version '3.0.4'
-    id 'io.spring.dependency-management' version '1.1.0'
-    id "io.freefair.lombok" version "6.6.1"
-    id "org.jsonschema2dataclass" version "3.2.1"
-    id 'org.graalvm.buildtools.native' version '0.9.20'
+  id 'java'
+  id 'groovy'
+  id 'org.springframework.boot' version '3.0.4'
+  id 'io.spring.dependency-management' version '1.1.0'
+  id "io.freefair.lombok" version "6.6.1"
+  id "org.jsonschema2dataclass" version "3.2.1"
+  id "com.google.cloud.tools.jib" version "3.3.1"
 }
 
 group = 'masters.aggregator-service'
@@ -41,11 +41,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named("bootBuildImage") {
-    imageName = "${project.name}"
-    publish = false
-}
-
 jsonSchema2Pojo {
     targetPackage = 'masters.aggregatorservice.schema'
     source.setFrom files("${project.rootDir}/src/main/resources/schema")
@@ -60,11 +55,11 @@ sourceSets {
     }
 }
 
-//jib {
-//    from {
-//        image = 'azul/zulu-openjdk:17-jre'
-//    }
-//    to {
-//        image = 'aggregator-service'
-//    }
-//}
+jib {
+  from {
+    image = 'azul/zulu-openjdk:17-jre'
+  }
+  to {
+    image = 'aggregator-service'
+  }
+}

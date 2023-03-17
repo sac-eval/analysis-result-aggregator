@@ -2,12 +2,14 @@ package masters.aggregatorservice.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table
 @Getter
 @Setter
+@NoArgsConstructor
 public class Statistic {
 
     @Id
@@ -15,13 +17,14 @@ public class Statistic {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "statistic_rule_violation_foreign_key"))
+    @JoinColumn(name = "rule_id", foreignKey = @ForeignKey(foreignKeyDefinition = "statistic_rule_violation_foreign_key"))
     private RuleViolation ruleViolation;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "statistic_tenant_foreign_key"))
-    private Tenant tenant;
 
     @Column(nullable = false)
     private Long occurrence;
+
+    public Statistic(RuleViolation ruleViolation, Long occurrence) {
+        this.ruleViolation = ruleViolation;
+        this.occurrence = occurrence;
+    }
 }

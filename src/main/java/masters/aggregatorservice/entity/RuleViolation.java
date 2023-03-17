@@ -20,11 +20,11 @@ public class RuleViolation {
     @Column(nullable = false)
     private String ruleSarifId;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = {CascadeType.PERSIST})
     @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "rule_violation_language_foreign_key"))
     private Language language;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = {CascadeType.PERSIST})
     @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "rule_violation_tool_foreign_key"))
     private Tool tool;
 

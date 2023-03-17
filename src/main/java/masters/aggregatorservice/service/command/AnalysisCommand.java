@@ -24,4 +24,6 @@ public class AnalysisCommand {
 
     private Set<String> preferedTools = new HashSet<>();
 
+    private String tenant;
+
 }

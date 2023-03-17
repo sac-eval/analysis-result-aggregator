@@ -17,4 +17,6 @@ public class AggregationCommand {
 
     private Set<String> preferedTools;
 
+    private String language;
+
 }

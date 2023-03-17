@@ -29,14 +29,14 @@
             </column>
         </createTable>
 
-        <createTable tableName="tenant">
-            <column name="id" type="serial">
-                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>
-            </column>
-            <column name="name" type="varchar(300)">
-                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>
-            </column>
-        </createTable>
+<!--        <createTable tableName="tenant">-->
+<!--            <column name="id" type="serial">-->
+<!--                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>-->
+<!--            </column>-->
+<!--            <column name="name" type="varchar(300)">-->
+<!--                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
 
         <createTable tableName="rule_violation">
             <column name="id" type="serial">
@@ -64,7 +64,7 @@
                                  referencedColumnNames="id"/>
 
         <createTable tableName="synonyms">
-            <column name="id" type="bigint">
+            <column name="id" type="serial">
                 <constraints primaryKey="true" primaryKeyName="synonym_id_pk"/>
             </column>
             <column name="base_id" type="bigint">
@@ -90,9 +90,9 @@
             <column name="rule_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="tenant_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
+<!--            <column name="tenant_id" type="bigint">-->
+<!--                <constraints nullable="true"/>-->
+<!--            </column>-->
             <column name="occurrence" type="bigint" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
@@ -101,10 +101,10 @@
                                  constraintName="statistic_rule_violation_foreign_key"
                                  referencedTableName="rule_violation"
                                  referencedColumnNames="id"/>
-        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"
-                                 constraintName="statistic_tenant_foreign_key"
-                                 referencedTableName="tenant"
-                                 referencedColumnNames="id"/>
+<!--        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"-->
+<!--                                 constraintName="statistic_tenant_foreign_key"-->
+<!--                                 referencedTableName="tenant"-->
+<!--                                 referencedColumnNames="id"/>-->
     </changeSet>
 
 </databaseChangeLog>

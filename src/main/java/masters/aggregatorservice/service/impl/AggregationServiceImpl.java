@@ -35,7 +35,7 @@ public class AggregationServiceImpl implements AggregationService {
                         .toList();
         final List<Run> finalizedRuns =
                 Boolean.TRUE.equals(aggregationCommand.getFlattenViolations()) ?
-                        flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools()) :
+                        flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools(), aggregationCommand.getLanguage()) :
                         aggregatedRuns;
         sarif.setRuns(finalizedRuns);
 
@@ -48,7 +48,7 @@ public class AggregationServiceImpl implements AggregationService {
         return sarif;
     }
 
-    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools) {
+    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools, String language) {
         final Map<String, Set<String>> inclusionSetMap = new HashMap<>();
 
         // for each run and each result see if already included violations are synonyms, if they are remove them
@@ -57,16 +57,16 @@ public class AggregationServiceImpl implements AggregationService {
 
             run.getResults().forEach(result -> {
                 final Set<RuleViolation> synonyms =
-                        ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName);
+                        ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName, language);
 
                 final List<RuleViolation> currentSynonyms = synonyms.stream()
-                    .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool(), Collections.emptySet())
+                    .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool().getName(), Collections.emptySet())
                         .contains(synonym.getRuleSarifId()))
                     .toList();
 
                 if (currentSynonyms.isEmpty() || preferredTools.contains(toolName)) {
                     currentSynonyms.forEach(
-                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool(), new HashSet<>())
+                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool().getName(), new HashSet<>())
                             .remove(ruleViolation.getRuleSarifId()));
 
                     final Set<String> ruleIdSet = inclusionSetMap.getOrDefault(toolName, new HashSet<>());
@@ -79,8 +79,11 @@ public class AggregationServiceImpl implements AggregationService {
         }
 
         // include in final sarif only those rules that are left in inclusionSetMap
+
         for (Run run : aggregatedRuns) {
             final String toolName = run.getTool().getDriver().getName();
+
+
 
             final Set<ReportingDescriptor> rules = run.getTool().getDriver().getRules();
             if (Objects.nonNull(rules)) {

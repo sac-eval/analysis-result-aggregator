@@ -3,6 +3,7 @@ package masters.aggregatorservice.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Table
 @Getter
 @Setter
+@NoArgsConstructor
 public class Tool {
 
     @Id
@@ -19,4 +21,8 @@ public class Tool {
 
     @Column(nullable = false)
     private String name;
+
+    public Tool(String name) {
+        this.name = name;
+    }
 }
