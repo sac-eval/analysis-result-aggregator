@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+<!--    <changeSet id="20230316-03" author="Nikola Kešćec">-->
+<!--        <sqlFile path="/sql/language.sql" relativeToChangelogFile="true"/>-->
+<!--        <sqlFile path="/sql/tool.sql" relativeToChangelogFile="true"/>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="20230316-02" author="Nikola Kešćec" dbms="h2">-->
+<!--        <sqlFile path="/sql/h2/checkstyle.sql" relativeToChangelogFile="true"/>-->
+<!--        <sqlFile path="/sql/h2/cppcheck.sql" relativeToChangelogFile="true"/>-->
+<!--        <sqlFile path="/sql/h2/infer.sql" relativeToChangelogFile="true"/>-->
+<!--        <sqlFile path="/sql/h2/pmd.sql" relativeToChangelogFile="true"/>-->
+<!--        <sqlFile path="/sql/h2/synonyms.sql" relativeToChangelogFile="true"/>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>

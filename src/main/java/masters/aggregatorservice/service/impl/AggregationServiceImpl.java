@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class AggregationServiceImpl implements AggregationService {
 
     private static final URI schema =
-        URI.create("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json");
+            URI.create("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json");
 
     private final RuleViolationQueryService ruleViolationQueryService;
 
@@ -30,25 +30,25 @@ public class AggregationServiceImpl implements AggregationService {
         sarif.setVersion(Sarif.Version._2_1_0);
 
         final List<Run> aggregatedRuns =
-            sarifs.stream()
-                .flatMap(intermediate -> intermediate.getRuns().stream())
-                .toList();
+                sarifs.stream()
+                        .flatMap(intermediate -> intermediate.getRuns().stream())
+                        .toList();
         final List<Run> finalizedRuns =
-            Boolean.TRUE.equals(aggregationCommand.getFlattenViolations()) ?
-                flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools()) :
-                aggregatedRuns;
+                Boolean.TRUE.equals(aggregationCommand.getFlattenViolations()) ?
+                        flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools(), aggregationCommand.getLanguage()) :
+                        aggregatedRuns;
         sarif.setRuns(finalizedRuns);
 
         final Set<ExternalProperties> aggregatedInlineExternalProperties =
-            sarifs.stream()
-                .flatMap(intermediate -> intermediate.getInlineExternalProperties().stream())
-                .collect(Collectors.toSet());
+                sarifs.stream()
+                        .flatMap(intermediate -> intermediate.getInlineExternalProperties().stream())
+                        .collect(Collectors.toSet());
         sarif.setInlineExternalProperties(aggregatedInlineExternalProperties);
 
         return sarif;
     }
 
-    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools) {
+    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools, String language) {
         final Map<String, Set<String>> inclusionSetMap = new HashMap<>();
 
         // for each run and each result see if already included violations are synonyms, if they are remove them
@@ -57,17 +57,17 @@ public class AggregationServiceImpl implements AggregationService {
 
             run.getResults().forEach(result -> {
                 final Set<RuleViolation> synonyms =
-                    ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName);
+                        ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName, language);
 
                 final List<RuleViolation> currentSynonyms = synonyms.stream()
-                    .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool(), Collections.emptySet())
-                        .contains(synonym.getRuleId()))
+                    .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool().getName(), Collections.emptySet())
+                        .contains(synonym.getRuleSarifId()))
                     .toList();
 
                 if (currentSynonyms.isEmpty() || preferredTools.contains(toolName)) {
                     currentSynonyms.forEach(
-                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool(), new HashSet<>())
-                            .remove(ruleViolation.getRuleId()));
+                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool().getName(), new HashSet<>())
+                            .remove(ruleViolation.getRuleSarifId()));
 
                     final Set<String> ruleIdSet = inclusionSetMap.getOrDefault(toolName, new HashSet<>());
 
@@ -79,23 +79,26 @@ public class AggregationServiceImpl implements AggregationService {
         }
 
         // include in final sarif only those rules that are left in inclusionSetMap
+
         for (Run run : aggregatedRuns) {
             final String toolName = run.getTool().getDriver().getName();
+
+
 
             final Set<ReportingDescriptor> rules = run.getTool().getDriver().getRules();
             if (Objects.nonNull(rules)) {
                 final Set<ReportingDescriptor> includedRules = rules.stream()
-                    .filter(rule -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
-                        .contains(rule.getName()))
-                    .collect(Collectors.toSet());
+                        .filter(rule -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
+                                .contains(rule.getName()))
+                        .collect(Collectors.toSet());
 
                 run.getTool().getDriver().setRules(includedRules);
             }
 
             final List<Result> includedResults = run.getResults().stream()
-                .filter(result -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
-                    .contains(result.getRuleId()))
-                .toList();
+                    .filter(result -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
+                            .contains(result.getRuleId()))
+                    .toList();
 
             run.setResults(includedResults);
         }
