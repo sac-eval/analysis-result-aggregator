@@ -2,14 +2,14 @@ package masters.aggregatorservice.service;
 
 import masters.aggregatorservice.entity.Tool;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 
 public interface ToolQueryService {
 
-    Optional<Tool> findByName(String name);
+    List<Tool> findAll();
 
-    Map<String, URI> getToolsForLanguage(String language);
+    List<Tool> findAllByLanguage(String language);
+
+    Tool findByName(String name);
 
 }

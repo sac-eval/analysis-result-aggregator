@@ -1,12 +1,8 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
-        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20230316-01" author="Nikola Kešćec">
         <comment>This changeset prepares tables for language, tools, possible tenants, rule violations.</comment>
@@ -29,14 +25,14 @@
             </column>
         </createTable>
 
-<!--        <createTable tableName="tenant">-->
-<!--            <column name="id" type="serial">-->
-<!--                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>-->
-<!--            </column>-->
-<!--            <column name="name" type="varchar(300)">-->
-<!--                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>-->
-<!--            </column>-->
-<!--        </createTable>-->
+        <!--        <createTable tableName="tenant">-->
+        <!--            <column name="id" type="serial">-->
+        <!--                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>-->
+        <!--            </column>-->
+        <!--            <column name="name" type="varchar(300)">-->
+        <!--                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>-->
+        <!--            </column>-->
+        <!--        </createTable>-->
 
         <createTable tableName="rule_violation">
             <column name="id" type="serial">
@@ -90,9 +86,9 @@
             <column name="rule_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-<!--            <column name="tenant_id" type="bigint">-->
-<!--                <constraints nullable="true"/>-->
-<!--            </column>-->
+            <!--            <column name="tenant_id" type="bigint">-->
+            <!--                <constraints nullable="true"/>-->
+            <!--            </column>-->
             <column name="occurrence" type="bigint" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
@@ -101,10 +97,38 @@
                                  constraintName="statistic_rule_violation_foreign_key"
                                  referencedTableName="rule_violation"
                                  referencedColumnNames="id"/>
-<!--        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"-->
-<!--                                 constraintName="statistic_tenant_foreign_key"-->
-<!--                                 referencedTableName="tenant"-->
-<!--                                 referencedColumnNames="id"/>-->
+        <!--        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"-->
+        <!--                                 constraintName="statistic_tenant_foreign_key"-->
+        <!--                                 referencedTableName="tenant"-->
+        <!--                                 referencedColumnNames="id"/>-->
+    </changeSet>
+
+    <changeSet id="20230326" author="Nikola Kešćec">
+        <addColumn tableName="tool">
+            <column name="url" type="varchar(1000)">
+                <constraints unique="true" uniqueConstraintName="tool_url_unique"/>
+            </column>
+        </addColumn>
+
+        <createTable tableName="tool_language">
+            <column name="tool_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="tool_language" baseColumnNames="tool_id"
+                                 constraintName="tool_language_tool_foreign_key"
+                                 referencedTableName="tool"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="tool_language" baseColumnNames="language_id"
+                                 constraintName="tool_language_language_foreign_key"
+                                 referencedTableName="language"
+                                 referencedColumnNames="id"/>
+        <addUniqueConstraint tableName="tool_language" columnNames="tool_id, language_id"
+                             constraintName="tool_language_unique"/>
     </changeSet>
 
 </databaseChangeLog>

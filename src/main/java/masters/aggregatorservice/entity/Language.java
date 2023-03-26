@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table
 @Getter
@@ -19,7 +21,7 @@ public class Language {
     @Column(nullable = false)
     private String name;
 
-    public Language(String name) {
-        this.name = name;
-    }
+    @ManyToMany(mappedBy = "languages")
+    private Set<Tool> tools;
+
 }

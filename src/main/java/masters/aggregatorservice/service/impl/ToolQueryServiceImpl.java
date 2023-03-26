@@ -2,32 +2,32 @@ package masters.aggregatorservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import masters.aggregatorservice.entity.Tool;
-import masters.aggregatorservice.properties.AggregatorProperties;
+import masters.aggregatorservice.exception.NotFoundException;
 import masters.aggregatorservice.repository.ToolRepository;
 import masters.aggregatorservice.service.ToolQueryService;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ToolQueryServiceImpl implements ToolQueryService {
 
-    private final AggregatorProperties aggregatorProperties;
-
     private final ToolRepository toolRepository;
 
     @Override
-    public Optional<Tool> findByName(String name) {
-        return toolRepository.findByName(name);
+    public List<Tool> findAll() {
+        return toolRepository.findAll();
     }
 
     @Override
-    public Map<String, URI> getToolsForLanguage(String language) {
-        return aggregatorProperties.getTools().getOrDefault(language, Collections.emptyMap());
+    public List<Tool> findAllByLanguage(String language) {
+        return toolRepository.findAllByLanguagesName(language);
+    }
+
+    @Override
+    public Tool findByName(String name) {
+        return toolRepository.findByName(name).orElseThrow(() -> new NotFoundException(Tool.class, name));
     }
 
 }
