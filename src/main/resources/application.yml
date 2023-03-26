@@ -5,15 +5,12 @@ spring:
   application:
     name: aggregator-service
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
-    driverClassName: org.h2.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/aggregator}
+    username: ${DATABASE_USER:aggregator}
+    password: ${DATABASE_PASSWORD:aggregatorpassword}
   jackson:
     serialization:
       write-empty-json-arrays: false
-  jpa:
-    show-sql: true # //TODO: NOT GOOD
   liquibase:
     change-log: classpath:db/changelog/changelog-master.xml
 

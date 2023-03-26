@@ -1,2 +1,5 @@
-INSERT INTO "LANGUAGE"(name)
-VALUES ('c'), ('java'), ('cpp'), ('javascript');
+INSERT INTO language(name)
+VALUES ('c'),
+       ('java'),
+       ('cpp'),
+       ('javascript');
