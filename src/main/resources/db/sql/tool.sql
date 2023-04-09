@@ -1,7 +1,7 @@
-INSERT INTO TOOL(name)
-VALUES ('Cppcheck'),
-       ('Infer'),
-       ('PMD'),
-       ('Checkstyle'),
-       ('Sonarqube'),
-       ('EsLint');
+INSERT INTO TOOL(name, url)
+VALUES ('Cppcheck', 'http://localhost:8094'),
+       ('Infer', 'http://localhost:8093'),
+       ('PMD', 'http://localhost:8090'),
+       ('Checkstyle', 'http://localhost:8092'),
+       ('Sonarqube', null),
+       ('EsLint', 'http://localhost:8091');

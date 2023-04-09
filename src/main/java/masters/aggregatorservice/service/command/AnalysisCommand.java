@@ -20,10 +20,8 @@ public class AnalysisCommand {
     private String language;
 
     @NotNull
-    private Boolean flattenViolations;
+    private Boolean synonymInfo;
 
-    private Set<String> preferedTools = new HashSet<>();
-
-    private String tenant;
+    private Set<String> includedTools = new HashSet<>();
 
 }

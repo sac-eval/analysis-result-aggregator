@@ -1,7 +1,6 @@
 package masters.aggregatorservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +20,16 @@ public class Tool {
 
     @Column(nullable = false)
     private String name;
+
+    @Column
+    private String url;
+
+    @ManyToMany
+    @JoinTable(name = "tool_language",
+            joinColumns = @JoinColumn(name = "tool_id", foreignKey = @ForeignKey(name = "tool_language_tool_foreign_key")),
+            inverseJoinColumns = @JoinColumn(name = "language_id", foreignKey = @ForeignKey(name = "tool_language_language_foreign_key"))
+    )
+    private Set<Language> languages;
 
     public Tool(String name) {
         this.name = name;

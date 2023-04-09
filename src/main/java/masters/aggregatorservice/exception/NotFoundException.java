@@ -2,10 +2,10 @@ package masters.aggregatorservice.exception;
 
 public class NotFoundException extends RuntimeException {
 
-    private static final String MESSAGE = "Rule violation for tool %s not found for id %s";
+    private static final String MESSAGE = "Search for entity %s not found for name %s";
 
-    public NotFoundException(String ruleId, String tool) {
-        super(String.format(MESSAGE, ruleId, tool));
+    public NotFoundException(Class<?> targetEntity, String tool) {
+        super(String.format(MESSAGE, targetEntity, tool));
     }
 
 }

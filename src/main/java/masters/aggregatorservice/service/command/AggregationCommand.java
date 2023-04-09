@@ -5,7 +5,6 @@ import lombok.Data;
 import masters.aggregatorservice.schema.Sarif;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
@@ -13,9 +12,7 @@ public class AggregationCommand {
 
     private List<Sarif> sarifs;
 
-    private Boolean flattenViolations;
-
-    private Set<String> preferedTools;
+    private Boolean synonymInfo;
 
     private String language;
 

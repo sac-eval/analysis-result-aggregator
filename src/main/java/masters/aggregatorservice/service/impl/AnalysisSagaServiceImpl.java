@@ -2,6 +2,7 @@ package masters.aggregatorservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import masters.aggregatorservice.entity.RuleViolation;
+import masters.aggregatorservice.entity.Tool;
 import masters.aggregatorservice.schema.Sarif;
 import masters.aggregatorservice.service.*;
 import masters.aggregatorservice.service.command.AggregationCommand;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -33,9 +34,10 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
     @Override
     @Transactional
     public Sarif analyse(AnalysisCommand analysisCommand) {
-        final Map<String, URI> tools = toolQueryService.getToolsForLanguage(analysisCommand.getLanguage());
+        final List<Tool> tools = toolQueryService.findAllByLanguage(analysisCommand.getLanguage());
+        final List<URI> toolURIs = tools.stream().map(Tool::getUrl).filter(Objects::nonNull).map(URI::create).toList();
 
-        final List<Sarif> sarifList = getSarifs(analysisCommand, tools);
+        final List<Sarif> sarifList = getSarifs(analysisCommand, toolURIs);
 
         final Set<RuleViolation> sarifRuleViolations = saveRuleViolationsFromSarifs(analysisCommand.getLanguage(), sarifList);
 
@@ -44,9 +46,9 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
         return aggregateSarifs(analysisCommand, sarifList);
     }
 
-    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, Map<String, URI> tools) {
+    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, List<URI> toolURIs) {
         final SarifExchangeCommand sarifExchangeCommand =
-            SarifExchangeCommand.builder().urls(tools.values()).analysisCommand(analysisCommand).build();
+                SarifExchangeCommand.builder().urls(toolURIs).analysisCommand(analysisCommand).build();
 
         return sarifExchangeService.exchangeSarifList(sarifExchangeCommand);
     }
@@ -65,8 +67,7 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
         final AggregationCommand aggregationCommand =
                 AggregationCommand.builder()
                         .sarifs(sarifList)
-                        .flattenViolations(analysisCommand.getFlattenViolations())
-                        .preferedTools(analysisCommand.getPreferedTools())
+                        .synonymInfo(analysisCommand.getSynonymInfo())
                         .language(analysisCommand.getLanguage())
                         .build();
 

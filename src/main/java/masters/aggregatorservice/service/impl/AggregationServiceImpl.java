@@ -2,10 +2,14 @@ package masters.aggregatorservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import masters.aggregatorservice.entity.RuleViolation;
-import masters.aggregatorservice.schema.*;
+import masters.aggregatorservice.schema.ExternalProperties;
+import masters.aggregatorservice.schema.PropertyBag;
+import masters.aggregatorservice.schema.Run;
+import masters.aggregatorservice.schema.Sarif;
 import masters.aggregatorservice.service.AggregationService;
 import masters.aggregatorservice.service.RuleViolationQueryService;
 import masters.aggregatorservice.service.command.AggregationCommand;
+import masters.aggregatorservice.service.dto.SynonymInfo;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -33,11 +37,16 @@ public class AggregationServiceImpl implements AggregationService {
                 sarifs.stream()
                         .flatMap(intermediate -> intermediate.getRuns().stream())
                         .toList();
-        final List<Run> finalizedRuns =
-                Boolean.TRUE.equals(aggregationCommand.getFlattenViolations()) ?
-                        flattenSynonymViolations(aggregatedRuns, aggregationCommand.getPreferedTools(), aggregationCommand.getLanguage()) :
-                        aggregatedRuns;
-        sarif.setRuns(finalizedRuns);
+        sarif.setRuns(aggregatedRuns);
+
+        if (Boolean.TRUE.equals(aggregationCommand.getSynonymInfo())) {
+            final Map<String, SynonymInfo> synonymInfoMap = retrieveSynonymInfo(aggregatedRuns, aggregationCommand.getLanguage());
+
+            final PropertyBag propertyBag = new PropertyBag();
+            synonymInfoMap.forEach(propertyBag::setAdditionalProperty);
+
+            sarif.setProperties(propertyBag);
+        }
 
         final Set<ExternalProperties> aggregatedInlineExternalProperties =
                 sarifs.stream()
@@ -45,11 +54,13 @@ public class AggregationServiceImpl implements AggregationService {
                         .collect(Collectors.toSet());
         sarif.setInlineExternalProperties(aggregatedInlineExternalProperties);
 
+
         return sarif;
     }
 
-    private List<Run> flattenSynonymViolations(List<Run> aggregatedRuns, Set<String> preferredTools, String language) {
-        final Map<String, Set<String>> inclusionSetMap = new HashMap<>();
+    private Map<String, SynonymInfo> retrieveSynonymInfo(List<Run> aggregatedRuns, String language) {
+        final Map<String, SynonymInfo> synonymInfoMap = new HashMap<>();
+        final Map<String, Set<String>> appearingRuleViolationsPerTool = new HashMap<>();
 
         // for each run and each result see if already included violations are synonyms, if they are remove them
         for (Run run : aggregatedRuns) {
@@ -60,50 +71,26 @@ public class AggregationServiceImpl implements AggregationService {
                         ruleViolationQueryService.findSynonyms(result.getRuleId(), toolName, language);
 
                 final List<RuleViolation> currentSynonyms = synonyms.stream()
-                    .filter(synonym -> inclusionSetMap.getOrDefault(synonym.getTool().getName(), Collections.emptySet())
-                        .contains(synonym.getRuleSarifId()))
-                    .toList();
+                        .filter(synonym -> appearingRuleViolationsPerTool.getOrDefault(synonym.getTool().getName(), Collections.emptySet())
+                                .contains(synonym.getRuleSarifId()))
+                        .toList();
 
-                if (currentSynonyms.isEmpty() || preferredTools.contains(toolName)) {
-                    currentSynonyms.forEach(
-                        ruleViolation -> inclusionSetMap.getOrDefault(ruleViolation.getTool().getName(), new HashSet<>())
-                            .remove(ruleViolation.getRuleSarifId()));
+                currentSynonyms.forEach(ruleViolation -> {
+                    final SynonymInfo synonymInfo = synonymInfoMap.getOrDefault(ruleViolation.getRuleSarifId(), new SynonymInfo(ruleViolation.getTool().getName()));
 
-                    final Set<String> ruleIdSet = inclusionSetMap.getOrDefault(toolName, new HashSet<>());
+                    final Map<String, String> toolSynonymInfoMap = synonymInfo.getSynonyms();
+                    toolSynonymInfoMap.put(toolName, result.getRuleId());
 
-                    ruleIdSet.add(result.getRuleId());
+                    synonymInfoMap.put(ruleViolation.getRuleSarifId(), synonymInfo);
+                });
 
-                    inclusionSetMap.put(toolName, ruleIdSet);
-                }
+                final Set<String> ruleIdSet = appearingRuleViolationsPerTool.getOrDefault(toolName, new HashSet<>());
+                ruleIdSet.add(result.getRuleId());
+                appearingRuleViolationsPerTool.put(toolName, ruleIdSet);
             });
         }
 
-        // include in final sarif only those rules that are left in inclusionSetMap
-
-        for (Run run : aggregatedRuns) {
-            final String toolName = run.getTool().getDriver().getName();
-
-
-
-            final Set<ReportingDescriptor> rules = run.getTool().getDriver().getRules();
-            if (Objects.nonNull(rules)) {
-                final Set<ReportingDescriptor> includedRules = rules.stream()
-                        .filter(rule -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
-                                .contains(rule.getName()))
-                        .collect(Collectors.toSet());
-
-                run.getTool().getDriver().setRules(includedRules);
-            }
-
-            final List<Result> includedResults = run.getResults().stream()
-                    .filter(result -> inclusionSetMap.getOrDefault(toolName, Collections.emptySet())
-                            .contains(result.getRuleId()))
-                    .toList();
-
-            run.setResults(includedResults);
-        }
-
-        return aggregatedRuns;
+        return synonymInfoMap;
     }
 
 }
