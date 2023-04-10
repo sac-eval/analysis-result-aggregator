@@ -13,8 +13,8 @@ spring:
       write-empty-json-arrays: false
   liquibase:
     change-log: classpath:db/changelog/changelog-master.xml
+    contexts: ${spring.profiles.active}
 
 aggregation:
   exchange:
     maximum-timeout: 10
-

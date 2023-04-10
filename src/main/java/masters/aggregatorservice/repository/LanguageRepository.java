@@ -1,7 +1,6 @@
 package masters.aggregatorservice.repository;
 
 import masters.aggregatorservice.entity.Language;
-import masters.aggregatorservice.entity.Tool;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

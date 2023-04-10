@@ -4,9 +4,16 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
+    <changeSet id="20230410-01" author="Nikola Kešćec" contextFilter="docker">
+        <sqlFile path="/sql/tool_docker.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="20230410-01" author="Nikola Kešćec" contextFilter="!docker">
+        <sqlFile path="/sql/tool.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
     <changeSet id="20230316-03" author="Nikola Kešćec">
         <sqlFile path="/sql/language.sql" relativeToChangelogFile="true"/>
-        <sqlFile path="/sql/tool.sql" relativeToChangelogFile="true"/>
         <sqlFile path="/sql/tool_language.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
