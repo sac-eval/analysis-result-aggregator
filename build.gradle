@@ -10,10 +10,15 @@ plugins {
 
 group = 'masters.aggregator-service'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
+    mavenLocal()
+}
+
+java {
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 dependencies {
