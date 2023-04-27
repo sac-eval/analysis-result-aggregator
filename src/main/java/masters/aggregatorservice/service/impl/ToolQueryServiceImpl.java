@@ -8,6 +8,7 @@ import masters.aggregatorservice.service.ToolQueryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,13 +22,13 @@ public class ToolQueryServiceImpl implements ToolQueryService {
     }
 
     @Override
-    public List<Tool> findAllByLanguage(String language) {
-        return toolRepository.findAllByLanguagesName(language);
+    public List<Tool> findAllByLanguageName(String languageName) {
+        return toolRepository.findAllByLanguagesName(languageName);
     }
 
     @Override
-    public Tool findByName(String name) {
-        return toolRepository.findByName(name).orElseThrow(() -> new NotFoundException(Tool.class, name));
+    public Tool findByName(String toolName) {
+        return toolRepository.findByName(toolName).orElseThrow(() -> new NotFoundException(Tool.class, Map.of("name", toolName)));
     }
 
 }

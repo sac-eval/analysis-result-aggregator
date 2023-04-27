@@ -7,6 +7,9 @@ import masters.aggregatorservice.repository.LanguageRepository;
 import masters.aggregatorservice.service.LanguageQueryService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class LanguageQueryServiceImpl implements LanguageQueryService {
@@ -14,8 +17,13 @@ public class LanguageQueryServiceImpl implements LanguageQueryService {
     private final LanguageRepository languageRepository;
 
     @Override
-    public Language findByName(String name) {
-        return languageRepository.findByName(name).orElseThrow(() -> new NotFoundException(Language.class, name));
+    public List<Language> findAll() {
+        return languageRepository.findAll();
+    }
+
+    @Override
+    public Language findByExtension(String extension) {
+        return languageRepository.findByExtension(extension).orElseThrow(() -> new NotFoundException(Language.class, Map.of("extension", extension)));
     }
 
 }

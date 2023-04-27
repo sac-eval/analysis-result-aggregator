@@ -7,4 +7,6 @@ public class LanguageResponse {
     private Long id;
 
     private String name;
+
+    private String extension;
 }

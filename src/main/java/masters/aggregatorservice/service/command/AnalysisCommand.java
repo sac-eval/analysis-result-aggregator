@@ -17,10 +17,11 @@ public class AnalysisCommand {
     private Boolean encoded;
 
     @NotBlank
-    private String language;
+    private String languageExtension;
 
-    @NotNull
     private Boolean synonymInfo;
+
+    private Boolean customMessages;
 
     private Set<String> includedTools = new HashSet<>();
 

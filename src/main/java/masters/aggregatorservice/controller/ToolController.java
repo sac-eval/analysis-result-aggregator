@@ -20,9 +20,9 @@ public class ToolController {
     private final ToolQueryService toolQueryService;
 
     @GetMapping
-    public List<ToolResponse> getAllSupportedTools(@RequestParam(required = false) String language) {
+    public List<ToolResponse> getAllTools(@RequestParam(required = false) String language) {
         if (Objects.nonNull(language)) {
-            return ToolMapper.INSTANCE.toolToToolResponses(toolQueryService.findAllByLanguage(language));
+            return ToolMapper.INSTANCE.toolToToolResponses(toolQueryService.findAllByLanguageName(language));
         } else {
             return ToolMapper.INSTANCE.toolToToolResponses(toolQueryService.findAll());
         }
