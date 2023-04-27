@@ -1,7 +1,7 @@
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20230410-01" author="Nikola Kešćec" contextFilter="docker">
@@ -23,6 +23,10 @@
         <sqlFile path="/sql/infer.sql" relativeToChangelogFile="true"/>
         <sqlFile path="/sql/pmd.sql" relativeToChangelogFile="true"/>
         <sqlFile path="/sql/synonyms.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="20240425-01" author="Nikola Kešćec">
+        <sqlFile path="/sql/custom_message.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
 </databaseChangeLog>

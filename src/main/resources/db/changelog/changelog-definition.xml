@@ -1,11 +1,13 @@
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20230316-01" author="Nikola Kešćec">
-        <comment>This changeset prepares tables for language, tools, possible tenants, rule violations.</comment>
+        <comment>This changeset prepares tables for language, tools, possible tenants, rule
+            violations.
+        </comment>
 
         <createTable tableName="language">
             <column name="id" type="serial">
@@ -25,15 +27,6 @@
             </column>
         </createTable>
 
-        <!--        <createTable tableName="tenant">-->
-        <!--            <column name="id" type="serial">-->
-        <!--                <constraints primaryKey="true" primaryKeyName="tenant_id_pk"/>-->
-        <!--            </column>-->
-        <!--            <column name="name" type="varchar(300)">-->
-        <!--                <constraints unique="true" uniqueConstraintName="tenant_name_unique"/>-->
-        <!--            </column>-->
-        <!--        </createTable>-->
-
         <createTable tableName="rule_violation">
             <column name="id" type="serial">
                 <constraints primaryKey="true" primaryKeyName="rule_violation_id_pk"/>
@@ -48,7 +41,8 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addUniqueConstraint tableName="rule_violation" columnNames="rule_sarif_id, language_id, tool_id"
+        <addUniqueConstraint tableName="rule_violation"
+                             columnNames="rule_sarif_id, language_id, tool_id"
                              constraintName="rule_violation_unique"/>
         <addForeignKeyConstraint baseTableName="rule_violation" baseColumnNames="language_id"
                                  constraintName="rule_violation_language_foreign_key"
@@ -86,9 +80,6 @@
             <column name="rule_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <!--            <column name="tenant_id" type="bigint">-->
-            <!--                <constraints nullable="true"/>-->
-            <!--            </column>-->
             <column name="occurrence" type="bigint" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
@@ -97,10 +88,6 @@
                                  constraintName="statistic_rule_violation_foreign_key"
                                  referencedTableName="rule_violation"
                                  referencedColumnNames="id"/>
-        <!--        <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="tenant_id"-->
-        <!--                                 constraintName="statistic_tenant_foreign_key"-->
-        <!--                                 referencedTableName="tenant"-->
-        <!--                                 referencedColumnNames="id"/>-->
     </changeSet>
 
     <changeSet id="20230326" author="Nikola Kešćec">
@@ -129,6 +116,45 @@
                                  referencedColumnNames="id"/>
         <addUniqueConstraint tableName="tool_language" columnNames="tool_id, language_id"
                              constraintName="tool_language_unique"/>
+    </changeSet>
+
+    <changeSet id="202304024" author="Nikola Kešćec">
+        <comment>Adding a custom message table and adding a fk to rule violation.
+        </comment>
+
+        <createTable tableName="custom_message">
+            <column name="id" type="serial">
+                <constraints primaryKey="true" primaryKeyName="custom_message_id_pk"/>
+            </column>
+            <column name="rule_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message_type" type="varchar(65)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="custom_message" baseColumnNames="rule_id"
+                                 constraintName="custom_message_rule_violation_foreign_key"
+                                 referencedTableName="rule_violation"
+                                 referencedColumnNames="id"/>
+
+        <addUniqueConstraint tableName="custom_message" columnNames="rule_id, message_type"
+                             constraintName="custom_message_rule_type_unique"/>
+    </changeSet>
+
+    <changeSet id="202304025" author="Nikola Kešćec">
+        <comment>Adding an extension column to language.
+        </comment>
+
+        <addColumn tableName="language">
+            <column name="extension" type="varchar(20)">
+                <constraints unique="true" uniqueConstraintName="language_extension_unique"/>
+            </column>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

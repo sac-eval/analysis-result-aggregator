@@ -25,7 +25,7 @@ public class SarifExchangeServiceImpl implements SarifExchangeService {
         final WrapperExchangeRequest wrapperExchangeRequest = WrapperExchangeRequest.builder()
             .code(command.getAnalysisCommand().getCode())
             .encoded(command.getAnalysisCommand().getEncoded())
-            .language(command.getAnalysisCommand().getLanguage())
+            .language(command.getAnalysisCommand().getLanguageExtension())
             .build();
 
         final List<CompletableFuture<Sarif>> completableFutureList = command.getUrls().stream()

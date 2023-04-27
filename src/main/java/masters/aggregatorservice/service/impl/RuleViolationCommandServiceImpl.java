@@ -6,7 +6,6 @@ import masters.aggregatorservice.entity.RuleViolation;
 import masters.aggregatorservice.entity.Tool;
 import masters.aggregatorservice.repository.RuleViolationRepository;
 import masters.aggregatorservice.schema.Sarif;
-import masters.aggregatorservice.service.LanguageQueryService;
 import masters.aggregatorservice.service.RuleViolationCommandService;
 import masters.aggregatorservice.service.ToolQueryService;
 import org.springframework.stereotype.Service;
@@ -24,13 +23,11 @@ public class RuleViolationCommandServiceImpl implements RuleViolationCommandServ
 
     private final ToolQueryService toolQueryService;
 
-    private final LanguageQueryService languageQueryService;
-
     private final RuleViolationQueryServiceImpl ruleViolationQueryService;
 
     @Override
     @Transactional
-    public Set<RuleViolation> createFromSarifForLanguage(Sarif sarif, String languageName) {
+    public Set<RuleViolation> createRuleViolationsFromSarifForLanguage(Sarif sarif, Language language) {
         final Set<RuleViolation> ruleViolations = new HashSet<>();
 
         sarif.getRuns().forEach(run -> {
@@ -39,15 +36,13 @@ public class RuleViolationCommandServiceImpl implements RuleViolationCommandServ
 
             run.getResults().forEach(result -> {
                 final String ruleName = result.getRuleId();
-                final Optional<RuleViolation> optionalRuleViolation = ruleViolationQueryService.findRuleViolation(ruleName, toolName, languageName);
+                final Optional<RuleViolation> optionalRuleViolation = ruleViolationQueryService.findRuleViolation(ruleName, tool, language);
 
                 if (optionalRuleViolation.isPresent()) {
                     ruleViolations.add(optionalRuleViolation.get());
 
                     return;
                 }
-
-                final Language language = languageQueryService.findByName(languageName);
 
                 final RuleViolation ruleViolation = new RuleViolation();
                 ruleViolation.setRuleSarifId(ruleName);

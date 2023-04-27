@@ -2,8 +2,12 @@ package masters.aggregatorservice.service;
 
 import masters.aggregatorservice.entity.Language;
 
+import java.util.List;
+
 public interface LanguageQueryService {
 
-    Language findByName(String name);
+    List<Language> findAll();
+
+    Language findByExtension(String name);
 
 }

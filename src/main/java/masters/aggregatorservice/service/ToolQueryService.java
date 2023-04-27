@@ -8,8 +8,8 @@ public interface ToolQueryService {
 
     List<Tool> findAll();
 
-    List<Tool> findAllByLanguage(String language);
+    List<Tool> findAllByLanguageName(String languageName);
 
-    Tool findByName(String name);
+    Tool findByName(String toolName);
 
 }

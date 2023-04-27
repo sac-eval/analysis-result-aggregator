@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "rule_violation")
 @Getter
@@ -24,5 +26,8 @@ public class RuleViolation {
     @ManyToOne(optional = false, cascade = {CascadeType.PERSIST})
     @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "rule_violation_tool_foreign_key"))
     private Tool tool;
+
+    @OneToMany(mappedBy = "ruleViolation")
+    private Set<CustomMessage> customMessages;
 
 }

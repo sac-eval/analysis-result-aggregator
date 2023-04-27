@@ -21,7 +21,10 @@ public class Language {
     @Column(nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "languages")
+    @Column(nullable = false)
+    private String extension;
+
+    @ManyToMany(mappedBy = "languages", fetch = FetchType.EAGER)
     private Set<Tool> tools;
 
 }
