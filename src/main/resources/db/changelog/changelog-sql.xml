@@ -29,4 +29,12 @@
         <sqlFile path="/sql/custom_message.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="2023056-01" author="Nikola Kešćec">
+        <sql>
+            UPDATE tool
+            SET disabled = true
+            WHERE tool.name = 'Sonarqube';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

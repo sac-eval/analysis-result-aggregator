@@ -12,6 +12,8 @@ public interface LanguageMapper {
 
     LanguageMapper INSTANCE = Mappers.getMapper(LanguageMapper.class);
 
-    List<LanguageResponse> languageToLanguageResponse(List<Language> languages);
+    LanguageResponse languageToLanguageResponse(Language language);
+
+    List<LanguageResponse> languageListToLanguageResponseList(List<Language> languages);
 
 }

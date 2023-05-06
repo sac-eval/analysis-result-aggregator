@@ -12,6 +12,10 @@ public class SarifExchangeCommand {
 
     private Collection<URI> urls;
 
-    private AnalysisCommand analysisCommand;
+    private String code;
+
+    private boolean encoded;
+
+    private String extension;
 
 }

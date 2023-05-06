@@ -23,6 +23,7 @@ java {
 
 dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.2.2.Final"
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'

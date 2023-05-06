@@ -17,13 +17,18 @@ public class LanguageQueryServiceImpl implements LanguageQueryService {
     private final LanguageRepository languageRepository;
 
     @Override
-    public List<Language> findAll() {
-        return languageRepository.findAll();
+    public List<Language> findByQuery(String name, String extension) {
+        return languageRepository.findByQuery(name, extension);
     }
 
     @Override
     public Language findByExtension(String extension) {
         return languageRepository.findByExtension(extension).orElseThrow(() -> new NotFoundException(Language.class, Map.of("extension", extension)));
+    }
+
+    @Override
+    public Language findById(Long id) {
+        return languageRepository.findById(id).orElseThrow(() -> new NotFoundException(Language.class, Map.of("id", id.toString())));
     }
 
 }

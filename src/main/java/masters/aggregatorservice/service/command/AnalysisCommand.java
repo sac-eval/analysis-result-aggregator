@@ -16,13 +16,13 @@ public class AnalysisCommand {
     @NotNull
     private Boolean encoded;
 
-    @NotBlank
-    private String languageExtension;
+    @NotNull
+    private Long languageId;
 
-    private Boolean synonymInfo;
+    private boolean synonymInfo;
 
-    private Boolean customMessages;
+    private boolean customMessages;
 
-    private Set<String> includedTools = new HashSet<>();
+    private Set<Long> excludedToolIds = new HashSet<>();
 
 }

@@ -28,6 +28,8 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
 
     private final LanguageQueryService languageQueryService;
 
+    private final ToolQueryService toolQueryService;
+
     private final RuleViolationCommandService ruleViolationCommandService;
 
     private final StatisticCommandService statisticCommandService;
@@ -35,10 +37,15 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
     @Override
     @Transactional
     public Sarif analyse(AnalysisCommand analysisCommand) {
-        final Language language = languageQueryService.findByExtension(analysisCommand.getLanguageExtension());
-        final List<URI> toolURIs = language.getTools().stream().map(Tool::getUrl).filter(Objects::nonNull).map(URI::create).toList();
+        final Language language = languageQueryService.findById(analysisCommand.getLanguageId());
+        final List<URI> toolURIs = toolQueryService.findByQuery(language, analysisCommand.getExcludedToolIds())
+            .stream()
+            .map(Tool::getUrl)
+            .filter(Objects::nonNull)
+            .map(URI::create)
+            .toList();
 
-        final List<Sarif> sarifList = getSarifs(analysisCommand, toolURIs);
+        final List<Sarif> sarifList = getSarifs(analysisCommand, toolURIs, language);
 
         final Set<RuleViolation> sarifRuleViolations = saveRuleViolationsFromSarifs(sarifList, language);
 
@@ -47,9 +54,14 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
         return aggregateSarifs(analysisCommand, sarifList, language);
     }
 
-    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, List<URI> toolURIs) {
+    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, List<URI> toolURIs, Language language) {
         final SarifExchangeCommand sarifExchangeCommand =
-            SarifExchangeCommand.builder().urls(toolURIs).analysisCommand(analysisCommand).build();
+            SarifExchangeCommand.builder()
+                .urls(toolURIs)
+                .code(analysisCommand.getCode())
+                .encoded(analysisCommand.getEncoded())
+                .extension(language.getExtension())
+                .build();
 
         return sarifExchangeService.exchangeSarifList(sarifExchangeCommand);
     }
@@ -68,8 +80,8 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
         final AggregationCommand aggregationCommand =
             AggregationCommand.builder()
                 .sarifs(sarifList)
-                .customMessages(analysisCommand.getCustomMessages())
-                .synonymInfo(analysisCommand.getSynonymInfo())
+                .customMessages(analysisCommand.isCustomMessages())
+                .synonymInfo(analysisCommand.isSynonymInfo())
                 .language(language)
                 .build();
 

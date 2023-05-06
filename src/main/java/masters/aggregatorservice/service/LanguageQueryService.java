@@ -6,8 +6,10 @@ import java.util.List;
 
 public interface LanguageQueryService {
 
-    List<Language> findAll();
+    List<Language> findByQuery(String name, String extension);
 
     Language findByExtension(String name);
+
+    Language findById(Long id);
 
 }
