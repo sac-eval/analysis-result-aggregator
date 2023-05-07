@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -25,6 +26,6 @@ public class Language {
     private String extension;
 
     @ManyToMany(mappedBy = "languages", fetch = FetchType.EAGER)
-    private Set<Tool> tools;
+    private Set<Tool> tools = Collections.emptySet();
 
 }

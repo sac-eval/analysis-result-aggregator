@@ -22,8 +22,8 @@ public class AggregationServiceImpl implements AggregationService {
 
     private static final URI schema =
         URI.create("https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json");
-    public static final String SYNONYMS = "synonyms";
-    public static final String CUSTOM = "custom";
+    public static final String SYNONYM_RULE_VIOLATIONS = "synonymRuleViolations";
+    public static final String CUSTOM_MESSAGES = "customMessages";
 
     private final RuleViolationQueryService ruleViolationQueryService;
 
@@ -55,10 +55,10 @@ public class AggregationServiceImpl implements AggregationService {
         }
 
         if (Boolean.TRUE.equals(aggregationCommand.getSynonymInfo())) {
-            final var synonymInfoMap = addSynonymInfo(aggregatedRuns, aggregationCommand.getLanguage());
+            final var synonymInfoMap = getSynonymInfo(aggregatedRuns, aggregationCommand.getLanguage());
 
             final PropertyBag propertyBag = new PropertyBag();
-            propertyBag.setAdditionalProperty(SYNONYMS, synonymInfoMap);
+            propertyBag.setAdditionalProperty(SYNONYM_RULE_VIOLATIONS, synonymInfoMap);
 
             sarif.setProperties(propertyBag);
         }
@@ -87,17 +87,16 @@ public class AggregationServiceImpl implements AggregationService {
             }
 
             final PropertyBag propertyBag = new PropertyBag();
-            propertyBag.setAdditionalProperty(CUSTOM, customMessageInfos);
-            // TODO: Enrich markdown
+            propertyBag.setAdditionalProperty(CUSTOM_MESSAGES, customMessageInfos);
             result.getMessage().setProperties(propertyBag);
         });
     }
 
-    private Map<String, Map<String, Map<String, String>>> addSynonymInfo(List<Run> aggregatedRuns, Language language) {
+    private Map<String, Map<String, Map<String, String>>> getSynonymInfo(List<Run> aggregatedRuns, Language language) {
         final Map<String, Map<String, Map<String, String>>> synonymsMap = new HashMap<>();
         final Map<String, Set<String>> appearingRuleViolationsPerTool = new HashMap<>();
 
-        // Find all rule violations in this sarif per tool
+        // Find all rule violations in this sarif log per tool
         for (Run run : aggregatedRuns) {
             final String toolName = run.getTool().getDriver().getName();
 

@@ -3,5 +3,5 @@ VALUES ('Cppcheck', 'http://localhost:8094'),
        ('Infer', 'http://localhost:8093'),
        ('PMD', 'http://localhost:8090'),
        ('Checkstyle', 'http://localhost:8092'),
-       ('Sonarqube', null),
+       ('Sonarqube', 'http://localhost:8095'),
        ('EsLint', 'http://localhost:8091');

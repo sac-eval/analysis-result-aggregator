@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.Set;
 
 @Entity
@@ -28,6 +29,6 @@ public class RuleViolation {
     private Tool tool;
 
     @OneToMany(mappedBy = "ruleViolation")
-    private Set<CustomMessage> customMessages;
+    private Set<CustomMessage> customMessages = Collections.emptySet();
 
 }
