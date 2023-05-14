@@ -17,7 +17,7 @@ public class AnalysisCommand {
     private Boolean encoded;
 
     @NotNull
-    private Long languageId;
+    private String languageExtension;
 
     private boolean synonymInfo;
 

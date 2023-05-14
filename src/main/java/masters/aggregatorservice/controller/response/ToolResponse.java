@@ -7,4 +7,6 @@ public class ToolResponse {
     private Long id;
 
     private String name;
+
+    private Double scanTime;
 }

@@ -28,6 +28,10 @@ public class RuleViolation {
     @JoinColumn(foreignKey = @ForeignKey(foreignKeyDefinition = "rule_violation_tool_foreign_key"))
     private Tool tool;
 
+    //SHOULD BE HANDLED BY A TRIGGER!
+    @Column(nullable = false)
+    private Long occurrence;
+
     @OneToMany(mappedBy = "ruleViolation")
     private Set<CustomMessage> customMessages = Collections.emptySet();
 

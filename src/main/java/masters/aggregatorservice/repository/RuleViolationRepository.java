@@ -14,6 +14,8 @@ import java.util.Set;
 @Repository
 public interface RuleViolationRepository extends JpaRepository<RuleViolation, Long> {
 
+    Optional<RuleViolation> findByRuleSarifIdAndTool_NameAndLanguage(String ruleName, String toolName, Language language);
+
     Optional<RuleViolation> findByRuleSarifIdAndToolAndLanguage(String ruleName, Tool tool, Language language);
 
     @Query(value = """

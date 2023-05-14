@@ -78,12 +78,13 @@
                 <constraints primaryKey="true" primaryKeyName="statistic_id_pk"/>
             </column>
             <column name="rule_id" type="bigint">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true" uniqueConstraintName="rule_id_unique"/>
             </column>
             <column name="occurrence" type="bigint" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addForeignKeyConstraint baseTableName="statistic" baseColumnNames="rule_id"
                                  constraintName="statistic_rule_violation_foreign_key"
                                  referencedTableName="rule_violation"
@@ -162,6 +163,18 @@
 
         <addColumn tableName="tool">
             <column name="disabled" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20230510" author="Nikola Kešćec">
+        <comment>Adding occurrence column to rule violation and dropping table statistics</comment>
+
+        <dropTable tableName="statistic"/>
+
+        <addColumn tableName="rule_violation">
+            <column name="occurrence" type="bigint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
