@@ -11,6 +11,6 @@ public class WrapperExchangeRequest {
 
     private Boolean encoded;
 
-    private String language;
+    private String languageExtension;
 
 }

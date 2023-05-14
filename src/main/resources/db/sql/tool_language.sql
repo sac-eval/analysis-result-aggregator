@@ -21,5 +21,5 @@ VALUES ((SELECT t.id FROM tool t WHERE t.name = 'Cppcheck'),
         (SELECT l.id FROM language l WHERE l.name = 'javascript')),
        ((SELECT t.id FROM tool t WHERE t.name = 'Sonarqube'),
         (SELECT l.id FROM language l WHERE l.name = 'python')),
-       ((SELECT t.id FROM tool t WHERE t.name = 'EsLint'),
+       ((SELECT t.id FROM tool t WHERE t.name = 'ESLint'),
         (SELECT l.id FROM language l WHERE l.name = 'javascript'));

@@ -34,7 +34,7 @@ public class SarifExchangeServiceImpl implements SarifExchangeService {
         final WrapperExchangeRequest wrapperExchangeRequest = WrapperExchangeRequest.builder()
             .code(command.getCode())
             .encoded(command.isEncoded())
-            .language(command.getLanguage().getExtension())
+            .languageExtension(command.getLanguage().getExtension())
             .build();
 
         final Map<Tool, CompletableFuture<TimedResult<Sarif>>> completableFutureList = command.getTools().stream()

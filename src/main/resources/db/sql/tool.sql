@@ -4,4 +4,4 @@ VALUES ('Cppcheck', 'http://localhost:8094'),
        ('PMD', 'http://localhost:8090'),
        ('Checkstyle', 'http://localhost:8092'),
        ('Sonarqube', 'http://localhost:8095'),
-       ('EsLint', 'http://localhost:8091');
+       ('ESLint', 'http://localhost:8091');
