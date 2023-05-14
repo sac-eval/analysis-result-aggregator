@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import masters.aggregatorservice.exception.ParallelRequestException;
 import masters.aggregatorservice.service.ParallelExchangeService;
+import masters.aggregatorservice.service.dto.TimedResult;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -24,7 +25,7 @@ public class ParallelExchangeServiceImpl implements ParallelExchangeService {
 
     @Override
     @Async
-    public <T, U> CompletableFuture<T> postRequestAsync(URI uri, U body, ParameterizedTypeReference<T> parameterizedTypeReference) {
+    public <T, U> CompletableFuture<TimedResult<T>> postRequestAsync(URI uri, U body, ParameterizedTypeReference<T> parameterizedTypeReference) {
         try {
             long startTime = System.nanoTime();
             final HttpEntity<U> httpEntity = new HttpEntity<>(body);
@@ -32,9 +33,10 @@ public class ParallelExchangeServiceImpl implements ParallelExchangeService {
                 restTemplate.exchange(uri, HttpMethod.POST, httpEntity, parameterizedTypeReference);
             long endTime = System.nanoTime();
 
-            log.info(String.format("Execution time for %s took %d", uri, (endTime - startTime) / 1000000));
+            long time = (endTime - startTime);
+            log.info(String.format("Execution time for %s took %d", uri, time / 1_000_000));
 
-            return CompletableFuture.completedFuture(result.getBody());
+            return CompletableFuture.completedFuture(new TimedResult<>(time / 1_000_000_000.f, result.getBody()));
         } catch (Exception exception) {
             return CompletableFuture.failedFuture(new ParallelRequestException(uri, exception));
         }

@@ -3,17 +3,18 @@ package masters.aggregatorservice.service.impl;
 import lombok.AllArgsConstructor;
 import masters.aggregatorservice.entity.Language;
 import masters.aggregatorservice.entity.RuleViolation;
-import masters.aggregatorservice.entity.Tool;
 import masters.aggregatorservice.repository.RuleViolationRepository;
+import masters.aggregatorservice.schema.Result;
+import masters.aggregatorservice.schema.Run;
 import masters.aggregatorservice.schema.Sarif;
 import masters.aggregatorservice.service.RuleViolationCommandService;
 import masters.aggregatorservice.service.ToolQueryService;
+import masters.aggregatorservice.service.dto.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 @AllArgsConstructor
@@ -25,35 +26,66 @@ public class RuleViolationCommandServiceImpl implements RuleViolationCommandServ
 
     private final RuleViolationQueryServiceImpl ruleViolationQueryService;
 
+    private final ConcurrentLinkedQueue<Triple<String, String, Language>> scheduledRuleViolations = new ConcurrentLinkedQueue<>();
+
+    @Override
+    public void scheduleRuleViolationUpdateFromSarifForLanguage(Sarif sarif, Language language) {
+        for (Run run : sarif.getRuns()) {
+            final String toolName = run.getTool().getDriver().getName();
+
+            for (Result result : run.getResults()) {
+                final String ruleName = result.getRuleId();
+
+                scheduledRuleViolations.add(new Triple<>(ruleName, toolName, language));
+            }
+        }
+    }
+
     @Override
     @Transactional
-    public Set<RuleViolation> createRuleViolationsFromSarifForLanguage(Sarif sarif, Language language) {
-        final Set<RuleViolation> ruleViolations = new HashSet<>();
+    public void updateScheduledRuleViolations(int processingSize) {
+        final List<RuleViolation> ruleViolations = new ArrayList<>(processingSize);
+        final Map<String, Map<String, RuleViolation>> existingRuleViolations = new HashMap<>();
 
-        sarif.getRuns().forEach(run -> {
-            final String toolName = run.getTool().getDriver().getName();
-            final Tool tool = toolQueryService.findByName(toolName);
+        for (int i = 0; i < processingSize; i++) {
+            final Triple<String, String, Language> poll = scheduledRuleViolations.poll();
 
-            run.getResults().forEach(result -> {
-                final String ruleName = result.getRuleId();
-                final Optional<RuleViolation> optionalRuleViolation = ruleViolationQueryService.findRuleViolation(ruleName, tool, language);
+            if (Objects.isNull(poll)) {
+                break;
+            }
 
-                if (optionalRuleViolation.isPresent()) {
-                    ruleViolations.add(optionalRuleViolation.get());
+            final String ruleSarifId = poll.getFirst();
+            final String toolName = poll.getSecond();
+            final Language language = poll.getThird();
 
-                    return;
-                }
+            Map<String, RuleViolation> ruleViolationPerToolMap = existingRuleViolations.computeIfAbsent(language.getName(), s -> new HashMap<>());
+            RuleViolation ruleViolation = ruleViolationPerToolMap.get(toolName);
 
-                final RuleViolation ruleViolation = new RuleViolation();
-                ruleViolation.setRuleSarifId(ruleName);
-                ruleViolation.setTool(tool);
-                ruleViolation.setLanguage(language);
+            if (ruleViolation == null) {
+                final Optional<RuleViolation> possiblySavedRuleViolation = ruleViolationQueryService.findRuleViolation(ruleSarifId, toolName, language);
+                ruleViolation = possiblySavedRuleViolation.orElseGet(
+                    () -> {
+                        final RuleViolation newRuleViolation = new RuleViolation();
 
-                ruleViolations.add(ruleViolationRepository.save(ruleViolation));
-            });
-        });
+                        newRuleViolation.setRuleSarifId(ruleSarifId);
+                        newRuleViolation.setTool(toolQueryService.findByName(toolName));
+                        newRuleViolation.setLanguage(language);
+                        newRuleViolation.setOccurrence(0L);
 
-        return ruleViolations;
+                        return newRuleViolation;
+                    }
+                );
+
+                ruleViolationPerToolMap.put(toolName, ruleViolation);
+                existingRuleViolations.put(language.getName(), ruleViolationPerToolMap);
+
+                ruleViolations.add(ruleViolation);
+            }
+
+            ruleViolation.setOccurrence(ruleViolation.getOccurrence() + 1);
+        }
+
+        ruleViolationRepository.saveAll(ruleViolations);
     }
 
 }

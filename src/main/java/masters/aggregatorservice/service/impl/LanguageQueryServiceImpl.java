@@ -17,6 +17,11 @@ public class LanguageQueryServiceImpl implements LanguageQueryService {
     private final LanguageRepository languageRepository;
 
     @Override
+    public List<Language> findAll() {
+        return languageRepository.findAll();
+    }
+
+    @Override
     public List<Language> findByQuery(String name, String extension) {
         return languageRepository.findByQuery(name, extension);
     }

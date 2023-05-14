@@ -2,7 +2,6 @@ package masters.aggregatorservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import masters.aggregatorservice.entity.Language;
-import masters.aggregatorservice.entity.RuleViolation;
 import masters.aggregatorservice.entity.Tool;
 import masters.aggregatorservice.schema.Sarif;
 import masters.aggregatorservice.service.*;
@@ -12,11 +11,8 @@ import masters.aggregatorservice.service.command.SarifExchangeCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URI;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,49 +28,32 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
 
     private final RuleViolationCommandService ruleViolationCommandService;
 
-    private final StatisticCommandService statisticCommandService;
-
     @Override
     @Transactional
     public Sarif analyse(AnalysisCommand analysisCommand) {
-        final Language language = languageQueryService.findById(analysisCommand.getLanguageId());
-        final List<URI> toolURIs = toolQueryService.findByQuery(language, analysisCommand.getExcludedToolIds())
-            .stream()
-            .map(Tool::getUrl)
+        final Language language = languageQueryService.findByExtension(analysisCommand.getLanguageExtension());
+        final List<Tool> tools = toolQueryService.findByQuery(language, analysisCommand.getExcludedToolIds()).stream()
             .filter(Objects::nonNull)
-            .map(URI::create)
             .toList();
 
-        final List<Sarif> sarifList = getSarifs(analysisCommand, toolURIs, language);
-
-        final Set<RuleViolation> sarifRuleViolations = saveRuleViolationsFromSarifs(sarifList, language);
-
-        statisticCommandService.updateOccurrences(sarifRuleViolations);
+        final List<Sarif> sarifList = getSarifs(analysisCommand, tools, language);
+        sarifList.forEach(sarif -> ruleViolationCommandService.scheduleRuleViolationUpdateFromSarifForLanguage(sarif, language));
 
         return aggregateSarifs(analysisCommand, sarifList, language);
     }
 
-    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, List<URI> toolURIs, Language language) {
+    private List<Sarif> getSarifs(AnalysisCommand analysisCommand, List<Tool> tools, Language language) {
         final SarifExchangeCommand sarifExchangeCommand =
             SarifExchangeCommand.builder()
-                .urls(toolURIs)
+                .tools(tools)
                 .code(analysisCommand.getCode())
                 .encoded(analysisCommand.getEncoded())
-                .extension(language.getExtension())
+                .language(language)
                 .build();
 
         return sarifExchangeService.exchangeSarifList(sarifExchangeCommand);
     }
 
-    private Set<RuleViolation> saveRuleViolationsFromSarifs(List<Sarif> sarifList, Language language) {
-        final Set<RuleViolation> sarifRuleViolations = new HashSet<>();
-        sarifList.forEach(sarif -> {
-            final Set<RuleViolation> ruleViolations = ruleViolationCommandService.createRuleViolationsFromSarifForLanguage(sarif, language);
-            sarifRuleViolations.addAll(ruleViolations);
-        });
-
-        return sarifRuleViolations;
-    }
 
     private Sarif aggregateSarifs(AnalysisCommand analysisCommand, List<Sarif> sarifList, Language language) {
         final AggregationCommand aggregationCommand =

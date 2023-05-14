@@ -15,14 +15,16 @@ public class LanguageController {
 
     private final LanguageQueryService languageQueryService;
 
+    private final LanguageMapper languageMapper;
+
     @GetMapping
     public List<LanguageResponse> findByQuery(@RequestParam(required = false) String name, @RequestParam(required = false) String extension) {
-        return LanguageMapper.INSTANCE.languageListToLanguageResponseList(languageQueryService.findByQuery(name, extension));
+        return languageMapper.languageListToLanguageResponseList(languageQueryService.findByQuery(name, extension));
     }
 
     @GetMapping("/{extension}")
     public LanguageResponse findByExtension(@PathVariable(required = false) String extension) {
-        return LanguageMapper.INSTANCE.languageToLanguageResponse(languageQueryService.findByExtension(extension));
+        return languageMapper.languageToLanguageResponse(languageQueryService.findByExtension(extension));
     }
 
 }

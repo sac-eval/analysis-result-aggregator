@@ -18,13 +18,18 @@ public class RuleViolationQueryServiceImpl implements RuleViolationQueryService 
     private final RuleViolationRepository ruleViolationRepository;
 
     @Override
+    public Optional<RuleViolation> findRuleViolation(String ruleName, String toolName, Language language) {
+        return ruleViolationRepository.findByRuleSarifIdAndTool_NameAndLanguage(ruleName, toolName, language);
+    }
+
+    @Override
     public Optional<RuleViolation> findRuleViolation(String ruleName, Tool tool, Language language) {
         return ruleViolationRepository.findByRuleSarifIdAndToolAndLanguage(ruleName, tool, language);
     }
 
     @Override
-    public Set<RuleViolation> findSynonyms(String ruleName, String tool, Language language) {
-        return ruleViolationRepository.findAllSynonyms(ruleName, tool, language.getId());
+    public Set<RuleViolation> findSynonyms(String ruleName, String toolName, Language language) {
+        return ruleViolationRepository.findAllSynonyms(ruleName, toolName, language.getId());
     }
 
 }
