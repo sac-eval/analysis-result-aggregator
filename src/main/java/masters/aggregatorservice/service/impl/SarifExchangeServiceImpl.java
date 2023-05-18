@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,11 +57,15 @@ public class SarifExchangeServiceImpl implements SarifExchangeService {
 
                 averageLatencyService.recordLatency(command.getLanguage(), tool, timedResult.getTime());
                 sarifList.add(timedResult.getResult());
-            } catch (ParallelRequestException parallelRequestException) {
+            } catch (CompletionException completionException) {
                 log.warning(String.format("Execution for tool %s failed.", completableFutureEntry.getKey().getName()));
 
                 if (!command.isToolFailureAllowed()) {
-                    throw parallelRequestException;
+                    if (completionException.getCause() instanceof ParallelRequestException) {
+                        throw (ParallelRequestException) completionException.getCause();
+                    } else {
+                        throw completionException;
+                    }
                 }
             }
         }
