@@ -19,4 +19,6 @@ public class SarifExchangeCommand {
 
     private Language language;
 
+    private boolean toolFailureAllowed;
+
 }

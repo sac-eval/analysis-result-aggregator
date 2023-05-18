@@ -3,6 +3,7 @@ package masters.aggregatorservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import masters.aggregatorservice.entity.Tool;
+import masters.aggregatorservice.exception.ParallelRequestException;
 import masters.aggregatorservice.schema.Sarif;
 import masters.aggregatorservice.service.AverageLatencyService;
 import masters.aggregatorservice.service.ParallelExchangeService;
@@ -14,6 +15,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -45,17 +47,25 @@ public class SarifExchangeServiceImpl implements SarifExchangeService {
 
         CompletableFuture.allOf(completableFutureList.values().toArray(new CompletableFuture[0]));
 
-        return completableFutureList.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                toolCompletableFutureEntry -> toolCompletableFutureEntry.getValue().join()))
-            .entrySet().stream()
-            .peek(toolCompletableFutureEntry ->
-                averageLatencyService.recordLatency(command.getLanguage(),
-                    toolCompletableFutureEntry.getKey(),
-                    toolCompletableFutureEntry.getValue().getTime()))
-            .map(Map.Entry::getValue)
-            .map(TimedResult::getResult)
-            .toList();
+        List<Sarif> sarifList = new ArrayList<>();
+
+        for (Map.Entry<Tool, CompletableFuture<TimedResult<Sarif>>> completableFutureEntry : completableFutureList.entrySet()) {
+            try {
+                final Tool tool = completableFutureEntry.getKey();
+                final TimedResult<Sarif> timedResult = completableFutureEntry.getValue().join();
+
+                averageLatencyService.recordLatency(command.getLanguage(), tool, timedResult.getTime());
+                sarifList.add(timedResult.getResult());
+            } catch (ParallelRequestException parallelRequestException) {
+                log.warning(String.format("Execution for tool %s failed.", completableFutureEntry.getKey().getName()));
+
+                if (!command.isToolFailureAllowed()) {
+                    throw parallelRequestException;
+                }
+            }
+        }
+
+        return sarifList;
     }
 
 }

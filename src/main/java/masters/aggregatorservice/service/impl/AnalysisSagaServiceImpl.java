@@ -49,6 +49,7 @@ public class AnalysisSagaServiceImpl implements AnalysisSagaService {
                 .code(analysisCommand.getCode())
                 .encoded(analysisCommand.getEncoded())
                 .language(language)
+                .toolFailureAllowed(analysisCommand.isToolFailureAllowed())
                 .build();
 
         return sarifExchangeService.exchangeSarifList(sarifExchangeCommand);

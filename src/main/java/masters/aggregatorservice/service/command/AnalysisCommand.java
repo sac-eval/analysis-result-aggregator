@@ -25,4 +25,6 @@ public class AnalysisCommand {
 
     private Set<Long> excludedToolIds = new HashSet<>();
 
+    private boolean toolFailureAllowed = true;
+
 }
